@@ -1,16 +1,39 @@
-// banner.js
+// banner.js - CSS, 컨테이너, 배너 자동 삽입형 (1파일 완성형)
 (function() {
-    // 유니크한 ID/클래스명
-    const containerId = 'my-banner-widget-container';
-    const bannerClass = 'my-banner-widget-banner';
-    const wideClass = 'my-banner-widget-wide';
+    // 1. 스타일 자동삽입
+    const css = `
+#my-banner-widget-container {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0; background: transparent;
+}
+.my-banner-widget-banner {
+    flex: 0 1 calc(25% - 10px); max-width: calc(25% - 10px); box-sizing: border-box;
+    border: 1px solid #444; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+.my-banner-widget-wide { flex: 0 1 calc(50% - 10px); max-width: calc(50% - 10px);}
+.my-banner-widget-banner img { width: 100%; height: auto; display: block;}
+.my-banner-widget-banner a { text-decoration: none; display: block;}
+@media (max-width:1199px){.my-banner-widget-banner{flex:0 1 calc(33.3% - 10px);max-width:calc(33.3% - 10px);}}
+@media (max-width:991px){.my-banner-widget-banner{flex:0 1 calc(50% - 10px);max-width:calc(50% - 10px);}
+.my-banner-widget-wide{flex:0 1 100%;max-width:100%;}}
+@media (max-width:480px){.my-banner-widget-banner,.my-banner-widget-wide{flex:0 1 100%;max-width:100%;}}
+    `;
+    const style = document.createElement('style');
+    style.innerHTML = css;
+    document.head.appendChild(style);
 
-    // fixedBanners: 항상 마지막에 고정
+    // 2. 컨테이너 자동삽입(없을때만)
+    let container = document.getElementById('my-banner-widget-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'my-banner-widget-container';
+        document.body.insertBefore(container, document.body.firstChild);
+    }
+
+    // 3. 배너 데이터 및 함수
     const fixedBanners = [
         { url: "https://xn--vy7ba476b.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/c4352a78-3a5f-42ce-5255-5f9be9ced200/public" }
     ];
-
-    // 랜덤 돌릴 일반 + 와이드
     const banners = [
         { url: "https://a8l-audi.com/", img: "https://imagedelivery.net/YBuUVvHrWBzVF83Na77hDQ/42adcbce-2231-4973-8e14-0ee48c8b3f00/public" },
         { url: "https://aha-bmw.com/", img: "https://imagedelivery.net/YBuUVvHrWBzVF83Na77hDQ/ef33775e-5535-44d3-7638-9e6a0eaf6b00/public" },
@@ -24,58 +47,42 @@
         { url: "https://www.bet38join.com/?a=40381/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/bff71d34-5f5a-42a9-41c8-9bdd43229200/public" },
         { url: "https://opview74.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/f035c716-5ed6-4d68-2896-fe07c463c300/public" }
     ];
-
-    // 와이드 배너(랜덤 삽입)
     const wideBanner = {
         url: "https://xn--2j5b2zz4c.net/",
         img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/d20a69f9-c32f-446c-a21e-6d786777a700/public",
         wide: true
     };
-
-    // 셔플 함수
     function shuffle(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
-
-    // DOM이 준비되면 실행
     function renderBanners() {
-        const bannerContainer = document.getElementById(containerId);
-        if (!bannerContainer) return;
-
-        // 랜덤 섞기
+        // 이미 배너가 있으면 중복 방지
+        if (container.dataset.filled === "1") return;
+        container.dataset.filled = "1";
         shuffle(banners);
-        // 와이드 랜덤 위치 삽입
         const insertIndex = Math.floor(Math.random() * (banners.length + 1));
         banners.splice(insertIndex, 0, wideBanner);
-
-        // 최종 리스트: 랜덤 + 고정
         const finalBanners = [...banners, ...fixedBanners];
-
-        // DOM에 삽입
         finalBanners.forEach(banner => {
             const a = document.createElement('a');
             a.href = banner.url;
             a.target = "_blank";
             a.rel = "nofollow noopener noreferrer";
-
             const img = document.createElement('img');
             img.src = banner.img;
             img.alt = "Banner";
-
             const div = document.createElement('div');
-            div.className = bannerClass;
-            if (banner.wide) div.classList.add(wideClass);
-
+            div.className = 'my-banner-widget-banner';
+            if (banner.wide) div.classList.add('my-banner-widget-wide');
             a.appendChild(img);
             div.appendChild(a);
-            bannerContainer.appendChild(div);
+            container.appendChild(div);
         });
     }
 
-    // 페이지 로드 후 실행
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         renderBanners();
     } else {
