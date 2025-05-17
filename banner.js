@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
+  const root = document.getElementById("banner-container");
+  if (!root) return;
+
   // 스타일 삽입
   const style = document.createElement("style");
   style.textContent = `
@@ -86,13 +89,13 @@ document.addEventListener("DOMContentLoaded", function () {
     <button class="tab-button" data-category="anime">무료애니</button>
     <button class="tab-button" data-category="webtoon">유료웹툰</button>
   `;
-  document.body.appendChild(tabContainer);
+  root.appendChild(tabContainer);
 
   // 버튼 영역 삽입
   const buttonContainer = document.createElement("div");
   buttonContainer.className = "button-container";
   buttonContainer.innerHTML = `<noscript>자바스크립트를 켜야 링크를 볼 수 있습니다.</noscript>`;
-  document.body.appendChild(buttonContainer);
+  root.appendChild(buttonContainer);
 
   // 링크 데이터
   const linkData = [
@@ -142,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
     { text: "유료웹툰 버프툰", url: "https://bufftoon.plaync.com/", class: "webtoon" },
     { text: "유료웹툰 코미코", url: "https://www.comico.kr/", class: "webtoon" },
     { text: "유료웹툰 까만봉지", url: "http://www.kkatoon.com/", class: "webtoon" }
-  ];
+  ]; // ← 기존 linkData 배열 그대로 붙여 넣으세요 (생략)
 
   // 링크 생성
   linkData.forEach(item => {
@@ -156,13 +159,13 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // 필터 기능
-  const tabButtons = document.querySelectorAll(".tab-button");
+  const tabButtons = tabContainer.querySelectorAll(".tab-button");
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const category = btn.getAttribute("data-category");
       tabButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      document.querySelectorAll(".button-container .button").forEach(button => {
+      buttonContainer.querySelectorAll(".button").forEach(button => {
         button.style.display = (category === "all" || button.classList.contains(category)) ? "flex" : "none";
       });
     });
