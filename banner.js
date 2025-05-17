@@ -1,91 +1,170 @@
-// banner.js - CSS, 컨테이너, 배너 자동 삽입형 (1파일 완성형)
-(function() {
-    // 1. 스타일 자동삽입
-    const css = `
-#my-banner-widget-container {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0; background: transparent;
+document.addEventListener("DOMContentLoaded", function () {
+  // 스타일 삽입
+  const style = document.createElement("style");
+  style.textContent = `
+@keyframes neon-glow {
+  0% { box-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff; }
+  50% { box-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff; }
+  100% { box-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff; }
 }
-.my-banner-widget-banner {
-    flex: 0 1 calc(25% - 10px); max-width: calc(25% - 10px); box-sizing: border-box;
-    border: 1px solid #444; border-radius: 8px; overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+@keyframes neon-glow-orange {
+  0% { box-shadow: 0 0 15px #FF8C00, 0 0 30px #FF4500; }
+  50% { box-shadow: 0 0 25px #FFA500, 0 0 50px #FF6347; }
+  100% { box-shadow: 0 0 15px #FF8C00, 0 0 30px #FF4500; }
 }
-.my-banner-widget-wide { flex: 0 1 calc(50% - 10px); max-width: calc(50% - 10px);}
-.my-banner-widget-banner img { width: 100%; height: auto; display: block;}
-.my-banner-widget-banner a { text-decoration: none; display: block;}
-@media (max-width:1199px){.my-banner-widget-banner{flex:0 1 calc(33.3% - 10px);max-width:calc(33.3% - 10px);}}
-@media (max-width:991px){.my-banner-widget-banner{flex:0 1 calc(50% - 10px);max-width:calc(50% - 10px);}
-.my-banner-widget-wide{flex:0 1 100%;max-width:100%;}}
-@media (max-width:480px){.my-banner-widget-banner,.my-banner-widget-wide{flex:0 1 100%;max-width:100%;}}
-    `;
-    const style = document.createElement('style');
-    style.innerHTML = css;
-    document.head.appendChild(style);
+.tab-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+.tab-button {
+  padding: 10px 20px;
+  background-color: #222;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.tab-button.active {
+  background-color: #00eaff;
+  color: #000;
+}
+.button-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: calc(45% - 10px);
+  max-width: 280px;
+  min-width: 140px;
+  padding: 14px 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 10px;
+  background: linear-gradient(45deg, #00eaff, #ff00ff);
+  border: 2px solid #00eaff;
+  box-shadow: 0 0 10px #00eaff, 0 0 20px #00eaff;
+  animation: neon-glow 2s infinite alternate;
+  transition: transform 0.2s ease;
+  text-align: center;
+}
+.button:hover {
+  transform: scale(1.04);
+}
+.button:focus {
+  outline: 2px dashed #00eaff;
+  outline-offset: 4px;
+}
+.button.joatoon {
+  background: linear-gradient(45deg, #FF8C00, #FFA500, #FF4500);
+  border: 2px solid #FF8C00;
+  box-shadow: 0 0 15px #FF8C00, 0 0 30px #FF4500;
+  animation: neon-glow-orange 1.5s infinite alternate;
+}`;
+  document.head.appendChild(style);
 
-    // 2. 컨테이너 자동삽입(없을때만)
-    let container = document.getElementById('my-banner-widget-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'my-banner-widget-container';
-        document.body.insertBefore(container, document.body.firstChild);
-    }
+  // 탭 버튼 삽입
+  const tabContainer = document.createElement("div");
+  tabContainer.className = "tab-container";
+  tabContainer.innerHTML = `
+    <button class="tab-button active" data-category="all">전체</button>
+    <button class="tab-button" data-category="freetoon">무료웹툰</button>
+    <button class="tab-button" data-category="manga">무료만화</button>
+    <button class="tab-button" data-category="anime">무료애니</button>
+    <button class="tab-button" data-category="webtoon">유료웹툰</button>
+  `;
+  document.body.appendChild(tabContainer);
 
-    // 3. 배너 데이터 및 함수
-    const fixedBanners = [
-        { url: "https://xn--vy7ba476b.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/c4352a78-3a5f-42ce-5255-5f9be9ced200/public" }
-    ];
-    const banners = [
-        { url: "https://a8l-audi.com/", img: "https://imagedelivery.net/YBuUVvHrWBzVF83Na77hDQ/42adcbce-2231-4973-8e14-0ee48c8b3f00/public" },
-        { url: "https://aha-bmw.com/", img: "https://imagedelivery.net/YBuUVvHrWBzVF83Na77hDQ/ef33775e-5535-44d3-7638-9e6a0eaf6b00/public" },
-        { url: "https://s-16.com?jc=6c8f3b33f054c3cf", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/9d3b636f-934a-441b-4d76-c92ef9eb5e00/public" },
-        { url: "http://xn--mi3bz4k.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/9826c574-8fc8-4330-2fbe-d1b6d0456100/public" },
-        { url: "http://xn--h11by6u74e3oi.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/215a25ab-4b50-4157-0202-e77deb83b300/public" },
-        { url: "http://xn--2i0ba424pba.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/89fb37c7-9e2f-4d87-fbd3-00d13a413500/public" },
-        { url: "http://rc337.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/20199e87-2b76-4011-2412-fcb5c5164a00/public" },
-        { url: "http://dg745.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/ecf0c844-3ea7-48e1-d565-ba1cadf15900/public" },
-        { url: "https://www.kcasinojoin.com/?a=53625/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/5f552e98-695e-4df4-473d-6a5c32e74a00/public" },
-        { url: "https://www.bet38join.com/?a=40381/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/bff71d34-5f5a-42a9-41c8-9bdd43229200/public" },
-        { url: "https://opview75.com/", img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/f035c716-5ed6-4d68-2896-fe07c463c300/public" }
-    ];
-    const wideBanner = {
-        url: "https://xn--2j5b2zz4c.net/",
-        img: "https://imagedelivery.net/hn8cyNBhDj7fHt_rfVXsFQ/d20a69f9-c32f-446c-a21e-6d786777a700/public",
-        wide: true
-    };
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-    }
-    function renderBanners() {
-        // 이미 배너가 있으면 중복 방지
-        if (container.dataset.filled === "1") return;
-        container.dataset.filled = "1";
-        shuffle(banners);
-        const insertIndex = Math.floor(Math.random() * (banners.length + 1));
-        banners.splice(insertIndex, 0, wideBanner);
-        const finalBanners = [...banners, ...fixedBanners];
-        finalBanners.forEach(banner => {
-            const a = document.createElement('a');
-            a.href = banner.url;
-            a.target = "_blank";
-            a.rel = "nofollow noopener noreferrer";
-            const img = document.createElement('img');
-            img.src = banner.img;
-            img.alt = "Banner";
-            const div = document.createElement('div');
-            div.className = 'my-banner-widget-banner';
-            if (banner.wide) div.classList.add('my-banner-widget-wide');
-            a.appendChild(img);
-            div.appendChild(a);
-            container.appendChild(div);
-        });
-    }
+  // 버튼 영역 삽입
+  const buttonContainer = document.createElement("div");
+  buttonContainer.className = "button-container";
+  buttonContainer.innerHTML = `<noscript>자바스크립트를 켜야 링크를 볼 수 있습니다.</noscript>`;
+  document.body.appendChild(buttonContainer);
 
-    if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        renderBanners();
-    } else {
-        document.addEventListener('DOMContentLoaded', renderBanners);
-    }
-})();
+  // 링크 데이터
+  const linkData = [
+    { text: "무료웹툰 조아툰", url: "https://joatoon65.com/", class: "joatoon freetoon" },
+    { text: "무료웹툰 블랙툰", url: "https://blacktoon357.com/", class: "freetoon" },
+    { text: "무료웹툰 뉴토끼", url: "https://newtoki468.com/", class: "freetoon" },
+    { text: "무료웹툰 툰코", url: "https://tkor013.com/", class: "freetoon" },
+    { text: "무료웹툰 북토끼", url: "https://booktoki468.com/", class: "freetoon" },
+    { text: "무료웹툰 펀비", url: "https://funbe527.com/", class: "freetoon" },
+    { text: "무료웹툰 해피툰", url: "https://happytoon01.com/", class: "freetoon" },
+    { text: "무료웹툰 섹툰", url: "https://3.sektoon.me/", class: "freetoon" },
+    { text: "무료웹툰 야툰", url: "https://yatoon201.com/", class: "freetoon" },
+    { text: "무료웹툰 나미툰", url: "https://namee74.com/", class: "freetoon" },
+    { text: "무료웹툰 뉴툰", url: "https://newtoon272.com/", class: "freetoon" },
+    { text: "무료웹툰 무료툰", url: "https://foc91.com/", class: "freetoon" },
+    { text: "무료웹툰 핫툰", url: "https://hottoon53.com/", class: "freetoon" },
+    { text: "무료웹툰 빅픽쳐", url: "https://bpt95.com/", class: "freetoon" },
+    { text: "무료웹툰 머니툰", url: "https://mtoon122.com/", class: "freetoon" },
+    { text: "무료웹툰 마징가툰", url: "https://z66.mzgtoon.com/", class: "freetoon" },
+    { text: "무료웹툰 호두코믹스", url: "https://t67.hoduhodu.com/", class: "freetoon" },
+    { text: "무료만화 만화방", url: "https://manhwabang.org/", class: "manga" },
+    { text: "무료만화 쿡마나", url: "https://www.cookmana47.com/", class: "manga" },
+    { text: "무료만화 일일툰", url: "https://www.11toon143.com/", class: "manga" },
+    { text: "무료망가 망가24", url: "https://manga24.net/", class: "manga" },
+    { text: "무료만화 마나토끼", url: "https://manatoki468.net/", class: "manga" },
+    { text: "무료만화 마나보자", url: "https://www.manaboza82.com/", class: "manga" },
+    { text: "무료만화 사쿠가보", url: "https://01.sakugabo.net/", class: "manga" },
+    { text: "무료애니 모애니", url: "https://moeni.live/", class: "anime" },
+    { text: "무료애니 애니24", url: "https://ohli24.com/", class: "anime" },
+    { text: "무료애니 애니위크", url: "https://aniweek.com/", class: "anime" },
+    { text: "무료애니 링크KKF", url: "https://kr.linkkf.net/", class: "anime" },
+    { text: "무료애니 애니울프", url: "https://aniwolf.com/", class: "anime" },
+    { text: "무료애니 애니야24", url: "https://www.aniya24.com/", class: "anime" },
+    { text: "무료애니 애니라이프", url: "https://anilife.app/", class: "anime" },
+    { text: "유료웹툰 탑툰", url: "https://toptoon.com/", class: "webtoon" },
+    { text: "무료웹툰 미툰", url: "https://metoon.co.kr/sub/?mode=toon", class: "freetoon" },
+    { text: "유료웹툰 봄툰", url: "https://www.bomtoon.com/bom/comic/main", class: "webtoon" },
+    { text: "유료웹툰 리디", url: "https://ridibooks.com/webtoon/recommendation", class: "webtoon" },
+    { text: "유료웹툰 무툰", url: "https://www.mootoon.co.kr/", class: "webtoon" },
+    { text: "유료웹툰 큐툰", url: "https://www.qtoon.co.kr/", class: "webtoon" },
+    { text: "유료웹툰 네이버웹툰", url: "https://comic.naver.com/index", class: "webtoon" },
+    { text: "유료웹툰 레진코믹스", url: "https://www.lezhin.com/ko", class: "webtoon" },
+    { text: "유료웹툰 카카오웹툰", url: "https://webtoon.kakao.com/", class: "webtoon" },
+    { text: "유료웹툰 미스터블루", url: "https://mrblue.com/", class: "webtoon" },
+    { text: "유료웹툰 케이툰", url: "https://www.myktoon.com/web/homescreen/main.kt?loginYn=N&adultViewYn=false", class: "webtoon" },
+    { text: "유료웹툰 원스토리", url: "https://onestory.co.kr/", class: "webtoon" },
+    { text: "유료웹툰 버프툰", url: "https://bufftoon.plaync.com/", class: "webtoon" },
+    { text: "유료웹툰 코미코", url: "https://www.comico.kr/", class: "webtoon" },
+    { text: "유료웹툰 까만봉지", url: "http://www.kkatoon.com/", class: "webtoon" }
+  ];
+
+  // 링크 생성
+  linkData.forEach(item => {
+    const a = document.createElement("a");
+    a.href = item.url;
+    a.textContent = item.text;
+    a.className = "button " + item.class;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    buttonContainer.appendChild(a);
+  });
+
+  // 필터 기능
+  const tabButtons = document.querySelectorAll(".tab-button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const category = btn.getAttribute("data-category");
+      tabButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.querySelectorAll(".button-container .button").forEach(button => {
+        button.style.display = (category === "all" || button.classList.contains(category)) ? "flex" : "none";
+      });
+    });
+  });
+});
