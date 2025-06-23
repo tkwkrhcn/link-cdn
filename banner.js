@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
     a.textContent = item.text;
     a.className = "button " + item.class;
     a.target = "_blank";
-    a.rel = "noopener noreferrer";
+     a.rel = "nofollow noopener noreferrer";
     buttonContainer.appendChild(a);
   });
 
