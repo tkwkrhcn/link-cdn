@@ -76,7 +76,15 @@ document.addEventListener("DOMContentLoaded", function () {
   border: 2px solid #FF8C00;
   box-shadow: 0 0 15px #FF8C00, 0 0 30px #FF4500;
   animation: neon-glow-orange 1.5s infinite alternate;
-}`;
+}
+.button,
+.button:hover,
+.button:focus,
+.button:active {
+  text-decoration: none !important;
+}
+
+`;
   document.head.appendChild(style);
 
   // 탭 버튼 삽입
